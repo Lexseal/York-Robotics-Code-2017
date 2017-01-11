@@ -34,14 +34,12 @@ int main() {
     cap.set(CV_CAP_PROP_FRAME_WIDTH, CAM_WIDTH);
     cap.set(CV_CAP_PROP_FRAME_HEIGHT, CAM_HEIGHT);
     
-    Mat originalImg, thresholdedImg(CAM_HEIGHT, CAM_WIDTH, CV_8UC3);
+    Mat originalImg, thresholdedImg;
     
     if (!cap.isOpened()) {
         sharedPrint.sharedPrintln(stringstream("no cam available"));
         return -1;
     }
-    cap.read(originalImg);
-    cap.read(thresholdedImg);
     cap.read(showImg);
     namedWindow("Show Img");
     //thread tShow(show_Img);
@@ -50,10 +48,10 @@ int main() {
     Scalar lowHSV = cv::Scalar(40, 100, 220);
     Scalar highHSV = cv::Scalar(140, 255, 255);
     
-    /*namedWindow("1");
+     namedWindow("1");
      namedWindow("2");
      namedWindow("3");
-     namedWindow("4");*/
+     namedWindow("4");
     
     thread tPre[4];
     for (int i = 0; i < 4; i++) {
@@ -78,13 +76,13 @@ int main() {
         
         //preProcess(originalImg, thresholdedImg, CV_BGR2GRAY, lowHSV, highHSV);
         
-        showImg = thresholdedImg;
+        //showImg = thresholdedImg;
         //imshow("Show Img", showImg);
         imshow("1", splitImg[0]);
         imshow("2", splitImg[1]);
         imshow("3", splitImg[2]);
         imshow("4", splitImg[3]);
-        waitKey(10);
+        waitKey(20);
         
         sharedPrint.sharedPrintln(stringstream() << n);
         n++;
@@ -108,10 +106,10 @@ void splitPre(const int& myNum, const int& mode, const Scalar& low, const Scalar
 {
     while (true) {
         if (newImgAvai[myNum]) {
-            newImgAvai[myNum] = false;
             cvtColor(splitImg[myNum], splitImg[myNum], mode);
             GaussianBlur(splitImg[myNum], splitImg[myNum], Size(7, 7), 2, 2);
             inRange(splitImg[myNum], low, high, splitImg[myNum]);
+            newImgAvai[myNum] = false;
         } else {
             usleep(200);
         }
