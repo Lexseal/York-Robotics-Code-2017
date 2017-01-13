@@ -37,7 +37,7 @@ int main() {
     Mat originalImg, thresholdedImg;
     
     if (!cap.isOpened()) {
-        sharedPrint.sharedPrintln(stringstream("no cam available"));
+        //sharedPrint.sharedPrintln(stringstream("no cam available"));
         return -1;
     }
     cap.read(showImg);
@@ -58,7 +58,7 @@ int main() {
         tPre[i] = thread(splitPre, i, CV_BGR2GRAY, lowHSV, highHSV);
     }
     
-    int n = 0;
+    //int n = 0;
     while (cap.read(originalImg)) {
         splitImg[0] = originalImg(Range(0, originalImg.rows/2-1), Range(0, originalImg.cols/2-1));
         splitImg[1] = originalImg(Range(0, originalImg.rows/2-1), Range(originalImg.cols/2, originalImg.cols-1));
@@ -72,7 +72,7 @@ int main() {
         while (newImgAvai[0] || newImgAvai[1] || newImgAvai[2] || newImgAvai[3]) {
         }
         
-        
+        //TODO
         
         //preProcess(originalImg, thresholdedImg, CV_BGR2GRAY, lowHSV, highHSV);
         
@@ -84,8 +84,8 @@ int main() {
         imshow("4", splitImg[3]);
         waitKey(20);
         
-        sharedPrint.sharedPrintln(stringstream() << n);
-        n++;
+        //sharedPrint.sharedPrintln(stringstream() << n);
+        //n++;
     }
     
     for (int i = 0; i < 4; i++) {
