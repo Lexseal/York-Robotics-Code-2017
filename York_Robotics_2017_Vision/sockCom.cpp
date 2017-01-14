@@ -17,25 +17,25 @@ SocketServer::SocketServer(const u_short& portNum)
     socklen_t size = sizeof(_sockAddr);
     
     if ((socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        sharedPrint.sharedPrintln(stringstream("\nError establishing socket..."));
+        cout << "\nError establishing socket..." << endl;
         throw "error0";
     } else {
-        sharedPrint.sharedPrintln(stringstream("\n=> Socket server has been created..."));
+        cout << "\n=> Socket server has been created..." << endl;
     }
     
     if ((::bind(socketFd, (struct sockaddr*)&_sockAddr, size)) < 0) {
-        sharedPrint.sharedPrintln(stringstream("=> Error binding connection, the socket has already been established..."));
+        cout << "=> Error binding connection, the socket has already been established..." << endl;
         throw "error1";
     }
     
-    sharedPrint.sharedPrintln(stringstream("=> Looking for clients..."));
+    cout << "=> Looking for clients..." << endl;
     listen(socketFd, 1);
     
     if ((socketConnect = accept(socketFd,(struct sockaddr *)&_sockAddr, &size)) < 0) {
-        sharedPrint.sharedPrintln(stringstream("=> Error on accepting..."));
+        cout << "=> Error on accepting..." << endl;
         throw "error2";
     } else {
-        sharedPrint.sharedPrint(stringstream()<<"=> Connected with the client # " <<socketConnect);
+        cout << "=> Connected with the client # " << socketConnect << endl;
         connected = true;
     }
 }
@@ -48,7 +48,7 @@ void SocketServer::sendStuff(const string& str)
     int bufsize = 16;
     char buffer[bufsize];
     
-    strcpy(buffer, stream.str().c_str());
+    //strcpy(buffer, stream.str().c_str());
     
     send(socketConnect, buffer, bufsize, 0);
 }

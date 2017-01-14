@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/pi/York_Robotics_2017_Vision/sockCom.cpp
+sockCom.hpp
+/home/pi/York_Robotics_2017_Vision/sockCom.hpp
+
+/home/pi/York_Robotics_2017_Vision/sockCom.hpp
+iostream
+-
+netinet/in.h
+-
+sys/socket.h
+-
+sstream
+-
+

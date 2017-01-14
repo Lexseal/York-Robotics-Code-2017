@@ -1,0 +1,5 @@
+/home/pi/York_Robotics_2017_Vision/CMakeFiles/rebuild_cache.dir
+/home/pi/York_Robotics_2017_Vision/CMakeFiles/edit_cache.dir
+/home/pi/York_Robotics_2017_Vision/CMakeFiles/yorkVision2017.dir
+/home/pi/York_Robotics_2017_Vision/CMakeFiles/SockCom.dir
+/home/pi/York_Robotics_2017_Vision/CMakeFiles/SharedPrt.dir

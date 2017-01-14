@@ -13,7 +13,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sstream>
-#include "SharedPrint.cpp"
 
 using namespace std;
 

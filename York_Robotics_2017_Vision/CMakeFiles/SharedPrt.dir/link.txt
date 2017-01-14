@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSharedPrt.a  CMakeFiles/SharedPrt.dir/SharedPrint.cpp.o
+/usr/bin/ranlib libSharedPrt.a
