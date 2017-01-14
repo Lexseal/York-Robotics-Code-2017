@@ -48,7 +48,7 @@ void SocketServer::sendStuff(const string& str)
     int bufsize = 16;
     char buffer[bufsize];
     
-    strcpy(buffer, stream.str().c_str());
+    //strcpy(buffer, stream.str().c_str());
     
     send(socketConnect, buffer, bufsize, 0);
 }

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSockCom.a  CMakeFiles/SockCom.dir/sockCom.cpp.o
+/usr/bin/ranlib libSockCom.a
