@@ -1,5 +1,0 @@
-/Users/lexseallin/Desktop/York-Robotics-Code-2017/York_Robotics_2017_Vision/CMakeFiles/SockCom.dir
-/Users/lexseallin/Desktop/York-Robotics-Code-2017/York_Robotics_2017_Vision/CMakeFiles/rebuild_cache.dir
-/Users/lexseallin/Desktop/York-Robotics-Code-2017/York_Robotics_2017_Vision/CMakeFiles/edit_cache.dir
-/Users/lexseallin/Desktop/York-Robotics-Code-2017/York_Robotics_2017_Vision/CMakeFiles/yorkVision2017.dir
-/Users/lexseallin/Desktop/York-Robotics-Code-2017/York_Robotics_2017_Vision/CMakeFiles/SharedPrt.dir

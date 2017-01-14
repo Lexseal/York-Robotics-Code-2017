@@ -37,6 +37,7 @@ int main() {
     Mat originalImg, thresholdedImg;
     
     if (!cap.isOpened()) {
+        cout << "no cam available" << endl;
         //sharedPrint.sharedPrintln(stringstream("no cam available"));
         return -1;
     }
