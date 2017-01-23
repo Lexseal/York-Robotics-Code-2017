@@ -1,116 +1,252 @@
 
 package org.usfirst.frc.team5171.robot;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.command.Scheduler;
-import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import org.usfirst.frc.team5171.robot.commands.ExampleCommand;
-import org.usfirst.frc.team5171.robot.subsystems.ExampleSubsystem;
-
 /**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the IterativeRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the manifest file in the resource
- * directory.
+ * Robot main class
+ * @author 	Kevin Barnard
+ * @since 	January 2017
+ *
  */
 public class Robot extends IterativeRobot {
+    
+    /**
+     * Which control set to use;
+     * 0 - XBOX
+     */
+    private final int CONTROL_SET = Map.XBOX;
 
-	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
-	public static OI oi;
-
-	Command autonomousCommand;
-	SendableChooser<Command> chooser = new SendableChooser<>();
-
+    /**
+     * Address for vision server
+     */
+    private final String VISION_ADDRESS = "RaspberryPi3";
+    
+    /**
+     * Port for vision socket
+     */
+    private final int VISION_PORT = 1501;
+    
 	/**
-	 * This function is run when the robot is first started up and should be
-	 * used for any initialization code.
+	 * Deadband value
 	 */
-	@Override
-	public void robotInit() {
-		oi = new OI();
-		chooser.addDefault("Default Auto", new ExampleCommand());
-		// chooser.addObject("My Auto", new MyAutoCommand());
-		SmartDashboard.putData("Auto mode", chooser);
-	}
+	private final double DEADBAND = 0.01;
+	
+    // Wheel motor sets and drive train
+    MotorSet lWheels = new MotorSet(), rWheels = new MotorSet();
+    DriveTrain driveTrain = new DriveTrain(lWheels, rWheels);
+    
+    // PID Controllers
+    PIDController 
+    	drivePID,
+    	visionPID;
+    
+    // Gyroscope
+    ADXRS450_Gyro gyro;
+    
+    // Vision
+    Vision vision;
+    
+    // Controllers
+    private Joystick 
+		controllerDrive,
+		controllerPanel;
+    
+    // Axes
+	private double
+		leftStickX 			= 0,
+		leftStickY 			= 0,
+		leftTrigger 		= 0,
+		rightTrigger 		= 0,
+		rightStickX 		= 0,
+		rightStickY 		= 0;
 
-	/**
-	 * This function is called once each time the robot enters Disabled mode.
-	 * You can use it to reset any subsystem information you want to clear when
-	 * the robot is disabled.
-	 */
-	@Override
-	public void disabledInit() {
+	// Buttons
+	private boolean 
+		buttonA = false,
+		buttonB = false,
+		buttonX = false,
+		buttonY = false,
+		
+		panelButton1 = false,
+		panelButton2 = false,
+		panelButton3 = false,
+		panelButton4 = false;
+	
+    /**
+     * Called once upon robot code initialization
+     */
+    public void robotInit() {
+    	
+    	// Clear SmartDashboard
+    	Function.clearDashboard();
+    	
+    	// Initialize controllers
+    	controllerDrive = new Joystick(Map.DRIVE_CONTROL);
+    	controllerPanel = new Joystick(Map.PANEL_CONTROL);
+    	
+    	// Add wheel motors to drive train motor sets
+        lWheels.add(new Talon(Map.MOTOR_L_1));
+        lWheels.add(new Talon(Map.MOTOR_L_2));
+        rWheels.add(new Talon(Map.MOTOR_R_1));
+        rWheels.add(new Talon(Map.MOTOR_R_2));
+        
+        // Initialize gyroscope
+        gyro = new ADXRS450_Gyro();
+        
+        // Initialize PID controllers
+        drivePID = new PIDController(21, 2.5, 7, gyro, driveTrain);
+        visionPID = new PIDController(0, 0, 0, vision, driveTrain);
+        
+        // Initialize vision
+        vision = new Vision(VISION_ADDRESS, VISION_PORT);
+        
+    }
 
-	}
+    /**
+     * Called once upon autonomous mode initialization
+     */
+    public void autonomousInit() {
+    	
+    	// Clear SmartDashboard
+    	Function.clearDashboard();
+    	
+    	// Start vision thread
+    	vision.start();
+    	
+    	// Enable vision PID control
+    	visionPID.enable();
+    	
+    	// Set vision PID setpoint
+    	visionPID.setSetpoint(0);
+    	
+    }
 
-	@Override
-	public void disabledPeriodic() {
-		Scheduler.getInstance().run();
-	}
+    /**
+     * Called periodically during autonomous mode
+     */
+    public void autonomousPeriodic() {
+    	
+    	SmartDashboard.putString("DB/String 0", Double.toString(visionPID.getError()));
+    	
+    }
 
-	/**
-	 * This autonomous (along with the chooser code above) shows how to select
-	 * between different autonomous modes using the dashboard. The sendable
-	 * chooser code works with the Java SmartDashboard. If you prefer the
-	 * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-	 * getString code to get the auto name from the text box below the Gyro
-	 *
-	 * You can add additional auto modes by adding additional commands to the
-	 * chooser code above (like the commented example) or additional comparisons
-	 * to the switch structure below with additional strings & commands.
-	 */
-	@Override
-	public void autonomousInit() {
-		autonomousCommand = chooser.getSelected();
+    /**
+     * Called once upon teleoperated mode initialization
+     */
+    public void teleopInit() {
+    	
+    	// Clear SmartDashboard
+    	Function.clearDashboard();
+    	
+    	// Enable drive PID
+    	drivePID.enable();
+    	
+    }
+    
+    /**
+     * Called periodically during teleoperated mode
+     */
+    public void teleopPeriodic() {
+    	
+    	/*
+    	 * Procedure:
+    	 * 	1. Read controllers in control set
+    	 * 	2. Eliminate deadband as necessary
+    	 * 	3. Control drive train
+    	 * 
+    	 */
+    	
+    	// Read controller settings from selected control set
+    	switch (CONTROL_SET) {
+    	
+    		// XBOX Controller (360 or One)
+	    	case Map.XBOX:
+	    		
+	    		leftStickX = controllerDrive.getRawAxis(Map.XBOX_L_STICK_X);
+		    	leftStickY = controllerDrive.getRawAxis(Map.XBOX_L_STICK_Y);
+		    	leftTrigger = controllerDrive.getRawAxis(Map.XBOX_L_TRIGGER);
+		    	rightTrigger = controllerDrive.getRawAxis(Map.XBOX_R_TRIGGER);
+		    	rightStickX = controllerDrive.getRawAxis(Map.XBOX_R_STICK_X);
+		    	rightStickY = controllerDrive.getRawAxis(Map.XBOX_R_STICK_Y);
+		    	
+		    	buttonA = controllerDrive.getRawButton(Map.XBOX_A);
+		    	buttonB = controllerDrive.getRawButton(Map.XBOX_B);
+		    	buttonX = controllerDrive.getRawButton(Map.XBOX_X);
+		    	buttonY = controllerDrive.getRawButton(Map.XBOX_Y);
+		    	
+		    	panelButton1 = controllerPanel.getRawButton(Map.PANEL_BUTTON_1);
+		    	panelButton2 = controllerPanel.getRawButton(Map.PANEL_BUTTON_2);
+		    	panelButton3 = controllerPanel.getRawButton(Map.PANEL_BUTTON_3);
+		    	panelButton4 = controllerPanel.getRawButton(Map.PANEL_BUTTON_4);
+		    	
+		    	break;
+		    	
+		    // Default if invalid
+		    default:
+		    	
+		    	leftStickX = 0;
+		    	leftStickY = 0;
+		    	leftTrigger = 0;
+		    	rightTrigger = 0;
+		    	rightStickX = 0;
+		    	rightStickY = 0;
+		    	
+		    	buttonA = false;
+		    	buttonB = false;
+		    	buttonX = false;
+		    	buttonY = false;
+		    	
+		    	panelButton1 = false;
+		    	panelButton2 = false;
+		    	panelButton3 = false;
+		    	panelButton4 = false;
+		    	
+		    	break;
+    	
+    	}
+    	
+    	// Eliminate deadband
+    	leftStickX 		= Function.eliminateDeadband(leftStickX, DEADBAND);
+    	leftStickY 		= Function.eliminateDeadband(leftStickY, DEADBAND);
+    	leftTrigger 	= Function.eliminateDeadband(leftTrigger, DEADBAND);
+    	rightTrigger	= Function.eliminateDeadband(rightTrigger, DEADBAND);
+    	rightStickX 	= Function.eliminateDeadband(rightStickX, DEADBAND);
+    	rightStickY 	= Function.eliminateDeadband(rightStickY, DEADBAND);
+    	
+    	// No-PID drive
+    	if (!drivePID.isEnabled()) driveTrain.drive(-leftStickY, rightStickX);
+    	
+    	// PID drive
+    	else {
+    		
+    		driveTrain.setThrottle = -leftStickY;
+    		drivePID.setSetpoint(drivePID.getSetpoint() + rightStickX);
+    		
+    	}
+        
+    }
 
-		/*
-		 * String autoSelected = SmartDashboard.getString("Auto Selector",
-		 * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
-		 * = new MyAutoCommand(); break; case "Default Auto": default:
-		 * autonomousCommand = new ExampleCommand(); break; }
-		 */
-
-		// schedule the autonomous command (example)
-		if (autonomousCommand != null)
-			autonomousCommand.start();
-	}
-
-	/**
-	 * This function is called periodically during autonomous
-	 */
-	@Override
-	public void autonomousPeriodic() {
-		Scheduler.getInstance().run();
-	}
-
-	@Override
-	public void teleopInit() {
-		// This makes sure that the autonomous stops running when
-		// teleop starts running. If you want the autonomous to
-		// continue until interrupted by another command, remove
-		// this line or comment it out.
-		if (autonomousCommand != null)
-			autonomousCommand.cancel();
-	}
-
-	/**
-	 * This function is called periodically during operator control
-	 */
-	@Override
-	public void teleopPeriodic() {
-		Scheduler.getInstance().run();
-	}
-
-	/**
-	 * This function is called periodically during test mode
-	 */
-	@Override
-	public void testPeriodic() {
-		LiveWindow.run();
-	}
+    /**
+     * Called once upon test mode initialization
+     */
+    public void testInit() {
+    	
+    	// Clear SmartDashboard
+    	Function.clearDashboard();
+    	
+    }
+    
+    /**
+     * Called periodically during test mode
+     */
+    public void testPeriodic() {
+    
+    }
+    
 }
