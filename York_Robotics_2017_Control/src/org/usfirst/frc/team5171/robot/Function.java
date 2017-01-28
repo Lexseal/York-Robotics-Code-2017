@@ -2,6 +2,11 @@ package org.usfirst.frc.team5171.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/**
+ * Basic static functions collection
+ * @author Kevin
+ *
+ */
 public class Function {
 	
 	/**
@@ -11,10 +16,7 @@ public class Function {
 	 * @return The deadband-eliminated value
 	 */
 	public static double eliminateDeadband(double value, double deadband) {
-		
-		if (Math.abs(value) >= deadband) return value;
-		return 0;
-		
+		return Math.abs(value) < deadband ? 0 : value;
 	}
 	
 	/**
@@ -22,11 +24,8 @@ public class Function {
 	 */
 	public static void clearDashboard() {
 		
-		for (int i = 0; i < 10; i++) {
-			
-			SmartDashboard.putString("DB/String "+i, "");
-			
-		}
+		for (int i = 0; i < 10; i++)
+			SmartDashboard.putString("DB/String " + i, "");
 		
 	}
 

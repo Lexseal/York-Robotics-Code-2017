@@ -8,6 +8,11 @@ import java.net.Socket;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 
+/**
+ * Vision stream reader and processor thread
+ * @author Kevin
+ *
+ */
 public class Vision extends Thread implements PIDSource {
 	
 	Socket socket;
@@ -47,19 +52,20 @@ public class Vision extends Thread implements PIDSource {
 				
 				if (buffer.readLine() != null) {
 					
+					// Read line from buffer
 					String read = buffer.readLine();
 					
+					// Extract data from line
 					read = read.substring(read.indexOf('$'), read.indexOf('*'));
+					String[] parts = read.split(",");
+					double[] data = new double[parts.length];
+					for (int i = 0; i < parts.length; i++) data[i] = Double.parseDouble(parts[i]);
 					
-					this.error = calculateError(Double.parseDouble(read));
+					// Calculate error from data
+					this.error = calculateError(data[0]);
 					
-				}
-				
-				else {
-					
+				} else
 					this.error = 0;
-					
-				}
 				
 			}
 			
@@ -68,7 +74,7 @@ public class Vision extends Thread implements PIDSource {
 	}
 	
 	/**
-	 * 
+	 * Calculate the error in degrees of the target from the center of the screen
 	 * @param center Pixel value of target center
 	 * @return Error in degrees from center of screen. Positive values are right of center
 	 */

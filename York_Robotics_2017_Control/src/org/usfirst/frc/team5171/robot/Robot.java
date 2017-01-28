@@ -4,7 +4,6 @@ package org.usfirst.frc.team5171.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -35,14 +34,19 @@ public class Robot extends IterativeRobot {
 	/**
 	 * Deadband value
 	 */
-	private final double DEADBAND = 0.01;
+	private final double DEADBAND = 0.16;
+	
+	/**
+	 * PID drive enabled
+	 */
+	private final boolean PID_DRIVE = true;
 	
     // Wheel motor sets and drive train
     MotorSet lWheels = new MotorSet(), rWheels = new MotorSet();
     DriveTrain driveTrain = new DriveTrain(lWheels, rWheels);
     
     // PID Controllers
-    PIDController 
+    IterativePIDController 
     	drivePID,
     	visionPID;
     
@@ -100,11 +104,11 @@ public class Robot extends IterativeRobot {
         gyro = new ADXRS450_Gyro();
         
         // Initialize PID controllers
-        drivePID = new PIDController(21, 2.5, 7, gyro, driveTrain);
-        visionPID = new PIDController(0, 0, 0, vision, driveTrain);
+        drivePID = new IterativePIDController(.1, .0001, .01, gyro, driveTrain);
+        // visionPID = new IterativePIDController(0, 0, 0, vision, driveTrain);
         
         // Initialize vision
-        vision = new Vision(VISION_ADDRESS, VISION_PORT);
+        // vision = new Vision(VISION_ADDRESS, VISION_PORT);
         
     }
 
@@ -116,11 +120,12 @@ public class Robot extends IterativeRobot {
     	// Clear SmartDashboard
     	Function.clearDashboard();
     	
+    	// Reset PID
+    	drivePID.reset();
+    	visionPID.reset();
+    	
     	// Start vision thread
     	vision.start();
-    	
-    	// Enable vision PID control
-    	visionPID.enable();
     	
     	// Set vision PID setpoint
     	visionPID.setSetpoint(0);
@@ -132,7 +137,7 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousPeriodic() {
     	
-    	SmartDashboard.putString("DB/String 0", Double.toString(visionPID.getError()));
+    	
     	
     }
 
@@ -144,8 +149,20 @@ public class Robot extends IterativeRobot {
     	// Clear SmartDashboard
     	Function.clearDashboard();
     	
-    	// Enable drive PID
-    	drivePID.enable();
+    	// Put initial PID values on SmartDashboard
+    	SmartDashboard.putString("DB/String 2", ""+drivePID.getkP());
+    	SmartDashboard.putString("DB/String 3", ""+drivePID.getkI());
+    	SmartDashboard.putString("DB/String 4", ""+drivePID.getkD());
+    	
+    	// Reset PID
+    	drivePID.reset();
+    	// visionPID.reset();
+    	
+    	// Set allowance of 1 degree
+    	drivePID.setTolerance(1);
+    	
+    	// Reset gyroscope degree
+    	gyro.reset();
     	
     }
     
@@ -153,6 +170,14 @@ public class Robot extends IterativeRobot {
      * Called periodically during teleoperated mode
      */
     public void teleopPeriodic() {
+    	
+    	// Put drive setpoint on SmartDashboard (angle)
+    	SmartDashboard.putString("DB/String 0", Double.toString(drivePID.getSetpoint()));
+    	
+    	// Fetch PID values from SmartDashboard
+    	drivePID.setkP(Double.parseDouble(SmartDashboard.getString("DB/String 2", "0")));
+    	drivePID.setkI(Double.parseDouble(SmartDashboard.getString("DB/String 3", "0")));
+    	drivePID.setkD(Double.parseDouble(SmartDashboard.getString("DB/String 4", "0")));
     	
     	/*
     	 * Procedure:
@@ -220,13 +245,16 @@ public class Robot extends IterativeRobot {
     	rightStickY 	= Function.eliminateDeadband(rightStickY, DEADBAND);
     	
     	// No-PID drive
-    	if (!drivePID.isEnabled()) driveTrain.drive(-leftStickY, rightStickX);
+    	if (!PID_DRIVE) driveTrain.drive(-leftStickY, rightStickX);
     	
     	// PID drive
     	else {
     		
     		driveTrain.setThrottle = -leftStickY;
-    		drivePID.setSetpoint(drivePID.getSetpoint() + rightStickX);
+    		drivePID.setSetpoint(drivePID.getSetpoint() + 5 * rightStickX);
+    		if (buttonB) drivePID.setSetpoint(180);
+    		SmartDashboard.putString("DB/String 1", ""+drivePID.getError(gyro.pidGet()));
+    		drivePID.update();
     		
     	}
         
@@ -246,6 +274,8 @@ public class Robot extends IterativeRobot {
      * Called periodically during test mode
      */
     public void testPeriodic() {
+    	
+    	
     
     }
     

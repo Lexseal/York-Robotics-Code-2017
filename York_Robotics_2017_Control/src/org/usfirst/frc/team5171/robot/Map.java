@@ -1,5 +1,10 @@
 package org.usfirst.frc.team5171.robot;
 
+/**
+ * Robot and joystick mappings class
+ * @author Kevin
+ *
+ */
 public class Map {
 	
 	public static final int

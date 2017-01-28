@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.SpeedController;
 
+/**
+ * Generic set of multiple SpeedController objects. Able to be written to as PIDOutput
+ * @author Kevin
+ *
+ */
 public class MotorSet implements PIDOutput {
 
 	/**
@@ -43,11 +48,8 @@ public class MotorSet implements PIDOutput {
 	 */
 	public void pidWrite(double output) {
 		
-		for (SpeedController motor:motors) {
-			
+		for (SpeedController motor:motors)
 			motor.set(output);
-			
-		}
 
 	}
 
